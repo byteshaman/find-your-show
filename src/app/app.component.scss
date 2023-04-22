@@ -1,0 +1,25 @@
+.slider {
+  width: 500px;
+}
+
+.align-center {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.flex-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+
+  .flex-item {
+    flex: 0 1 50px;
+  }
+}
+
+.flex-baseline {
+  display: flex;
+  gap: 5px;
+  align-items: baseline;
+}

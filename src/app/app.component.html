@@ -1,0 +1,151 @@
+<!-- <div>
+  <mat-form-field appearance="fill">
+    <mat-label>API Key</mat-label>
+    <input matInput placeholder="Your TMDb API key..." [formControl]="APIKey">
+    <button mat-icon-button matSuffix (click)="setAPIKey()">
+      <mat-icon>add</mat-icon>
+    </button>
+  </mat-form-field>
+</div> -->
+
+<form [formGroup]="formTV" autocomplete="off" (ngSubmit)="search()" style="margin-top: 25px;">
+  <!--! GENRES -->
+  <div class="flex-container">
+    <!-- Genres -->
+    <mat-form-field appearance="fill">
+      <mat-label>Genres</mat-label>
+      <mat-select formControlName="genres" multiple>
+      <mat-option>
+        <ngx-mat-select-search [noEntriesFoundLabel]="noEntriesFoundLabel" [placeholderLabel]="placeholderLabel" [formControl]="tvGenresSearch">
+        </ngx-mat-select-search>
+      </mat-option>
+      <mat-option *ngFor="let genre of filteredTVGenres$ | async" [value]="genre.id">
+        {{genre.name}}
+      </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Excluded genres -->
+    <mat-form-field appearance="fill">
+      <mat-label>Excluded Genres</mat-label>
+      <mat-select formControlName="excludedGenres" multiple>
+      <mat-option>
+        <ngx-mat-select-search [noEntriesFoundLabel]="noEntriesFoundLabel" [placeholderLabel]="placeholderLabel"
+          [formControl]="tvGenresExcludedSearch">
+        </ngx-mat-select-search>
+      </mat-option>
+      <mat-option *ngFor="let genre of filteredTVGenresExcluded$ | async" [value]="genre.id">
+        {{genre.name}}
+      </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- And/Or genres -->
+    <mat-form-field appearance="fill">
+      <mat-label>And/Or Logic (genres)</mat-label>
+      <mat-select formControlName="andorgenres">
+      <mat-option *ngFor="let logic of andOr" [value]="logic.id">
+        {{logic.name}}
+      </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!--! STATUS + KW  -->
+  <div class="flex-container">
+    <!-- Status -->
+    <mat-form-field appearance="fill" style="width: 170px;">
+      <mat-label>Status</mat-label>
+      <mat-select formControlName="status">
+        <mat-option *ngFor="let status of statuses" [value]="status.id">
+          {{status.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <!-- Keywords + tooltip -->
+    <div class="flex-baseline">
+      <mat-form-field appearance="fill">
+        <mat-label>Keywords</mat-label>
+        <mat-select formControlName="keywords" multiple (selectionChange)="handleSelectionChange($event)">
+          <mat-option>
+            <ngx-mat-select-search [noEntriesFoundLabel]="noEntriesFoundLabel" [placeholderLabel]="placeholderLabel"
+              [formControl]="keywordsSearch" [alwaysRestoreSelectedOptionsMulti]="true">
+            </ngx-mat-select-search>
+          </mat-option>
+          <mat-option *ngFor="let keyword of keywords$ | async" [value]="keyword">
+            {{keyword.name}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <button mat-mini-fab color="primary" [matTooltip]="getKeywordsList()" matTooltipPosition="right">
+        <mat-icon>menu</mat-icon>
+      </button>
+    </div>
+
+    <!-- And/Or keywords -->
+    <mat-form-field appearance="fill">
+      <mat-label>And/Or Logic (keywords)</mat-label>
+      <mat-select formControlName="andorkeywords">
+        <mat-option *ngFor="let logic of andOr" [value]="logic.id">
+          {{logic.name}}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <!--! NUM. OF EPISODES AND SEASONS -->
+  <ng-container>
+    <div class="align-center">N. of Episodes</div>
+    <div class="flex-container">
+      <mat-form-field appearance="fill">
+        <mat-label>Min</mat-label>
+        <input matInput type="number" min="0" formControlName="episodeNumMin">
+      </mat-form-field>
+
+      <mat-form-field appearance="fill">
+        <mat-label>Max</mat-label>
+        <input matInput type="number" min="0" formControlName="episodeNumMax">
+      </mat-form-field>
+    </div>
+
+    <div class="align-center">N. of Seasons</div>
+    <div class="flex-container">
+      <ng-container>
+        <mat-form-field appearance="fill">
+          <mat-label>Min</mat-label>
+          <input matInput type="number" min="0" formControlName="seasonNumMin">
+        </mat-form-field>
+        <mat-form-field appearance="fill">
+          <mat-label>Max</mat-label>
+          <input matInput type="number" min="0" formControlName="seasonNumMax">
+        </mat-form-field>
+      </ng-container>
+    </div>
+  </ng-container>
+
+  <!--! RATING -->
+  <div class="flex-container">
+    <span class="flex-item">Rating</span>
+    <mat-slider discrete min="0" max="100" class="slider">
+      <input matSliderStartThumb formControlName="ratingMin">
+      <input matSliderEndThumb formControlName="ratingMax">
+    </mat-slider>
+  </div>
+
+  <!--! YEAR -->
+  <div class="flex-container">
+    <span class="flex-item">Year</span>
+    <mat-slider discrete [min]="minYear" [max]="currentYear" class="slider">
+      <input matSliderStartThumb formControlName="yearMin">
+      <input matSliderEndThumb formControlName="yearMax">
+    </mat-slider>
+  </div>
+
+  <!--! BUTTONS -->
+  <div class="flex-container">
+    <button mat-flat-button type="submit" color="primary">Search</button>
+    <button mat-flat-button color="warn" (click)="resetForm()">Reset</button>
+  </div>
+</form>
