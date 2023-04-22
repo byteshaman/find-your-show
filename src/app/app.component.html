@@ -67,7 +67,7 @@
     <div class="flex-baseline">
       <mat-form-field appearance="fill">
         <mat-label>Keywords</mat-label>
-        <mat-select formControlName="keywords" multiple (selectionChange)="handleSelectionChange($event)">
+        <mat-select formControlName="keywords" multiple (selectionChange)="handleKeywordsSelectionChange($event)">
           <mat-option>
             <ngx-mat-select-search [noEntriesFoundLabel]="noEntriesFoundLabel" [placeholderLabel]="placeholderLabel"
               [formControl]="keywordsSearch" [alwaysRestoreSelectedOptionsMulti]="true">
@@ -146,6 +146,7 @@
   <!--! BUTTONS -->
   <div class="flex-container">
     <button mat-flat-button type="submit" color="primary">Search</button>
-    <button mat-flat-button color="warn" (click)="resetForm()">Reset</button>
+    <button mat-flat-button type="button" color="warn" (click)="resetForm()">Reset all</button>
+    <button mat-flat-button type="button" color="warn" (click)="resetKeywords()">Reset keywords</button>
   </div>
 </form>

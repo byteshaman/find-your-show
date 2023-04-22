@@ -74,7 +74,34 @@ export class AppComponent implements OnInit {
   constructor(private fb: FormBuilder, private httpService: HttpService) { }
 
   async ngOnInit(): Promise<void> {
-    this.resetForm();
+    // Retrieve form data
+    const formValue = JSON.parse(localStorage.getItem('formValue')!);
+    
+    //#region form initialisation
+    this.formTV = this.fb.group({
+      andorgenres: [formValue && formValue.andorgenres || ','],
+      andorkeywords: [formValue && formValue.andorkeywords || ','],
+      seasonNumMin: [formValue && formValue.seasonNumMin || 0],
+      seasonNumMax: [formValue && formValue.seasonNumMax || null],
+      episodeNumMin: [formValue && formValue.episodeNumMin || 0],
+      episodeNumMax: [formValue && formValue.episodeNumMax || null],
+      ratingMin: [formValue && formValue.ratingMin || 0],
+      ratingMax: [formValue && formValue.ratingMax || 100],
+      yearMin: [formValue && formValue.yearMin || this.minYear],
+      yearMax: [formValue && formValue.yearMax || this.currentYear],
+      genres: [formValue && formValue.genres || []],
+      excludedGenres: [formValue && formValue.excludedGenres || []],
+      keywords: [formValue && this.getKeywordsDescriptions(formValue.keywords) || []],
+      status: [formValue && formValue.status || 3],
+    });
+
+    console.log('this.formTV', this.formTV.controls)
+
+    this.formTV.valueChanges.subscribe(value => {
+      // console.log('Change in form detected', value)
+      this.saveFormState();
+    });
+    //#endregion form initialisation
 
     //#region keywords
     // Listen to keywordSearch changes
@@ -114,13 +141,43 @@ export class AppComponent implements OnInit {
     //#endregion
   }
 
-  handleSelectionChange(ev: MatSelectChange): void {
-    this.keywords = JSON.parse(JSON.stringify((ev.value as SelectOption[])?.map((keyword: SelectOption) => keyword.name).sort()));
+  /**
+   * Extract the description of the keyword from the object
+   * @param  {SelectOption[]} rawKeywords
+   * @returns void
+   */
+  getKeywordsDescriptions(rawKeywords: SelectOption[]): void { 
+    this.keywords = JSON.parse(JSON.stringify(rawKeywords?.map((keyword: SelectOption) => keyword.name).sort()));
+  }
+
+  /**
+   * Update the keywords selection
+   * @param  {MatSelectChange} ev
+   * @returns void
+   */
+  handleKeywordsSelectionChange(ev: MatSelectChange): void {
+    this.getKeywordsDescriptions(ev.value as SelectOption[]);
+    this.saveFormState();
     // console.log('keywords:', this.keywords)
   }
 
-  resetForm(): void {
+  /**
+   * Reset the keywords array and form control, update localStorage
+   * @returns void
+   */
+  resetKeywords(): void {
     this.keywords = [];
+    // Since patchValue/setValue doesn't work, re-create control from scratch
+    this.formTV.removeControl('keywords');
+    this.formTV.addControl('keywords', new FormControl([]));
+    this.saveFormState();
+  }
+
+  /**
+   * Reset the whole form
+   * @returns void
+   */
+  resetForm(): void {
 
     this.formTV = this.fb.group({
       andorgenres: [','],
@@ -135,9 +192,15 @@ export class AppComponent implements OnInit {
       yearMax: [this.currentYear],
       genres: [[]],
       excludedGenres: [[]],
-      keywords: [[]],
+      // keywords: [[]], //dealth with by the resetKeywords(), that will also update localStorage
       status: [3],
     });
+
+    this.resetKeywords();
+  }
+
+  saveFormState(): void {
+    localStorage.setItem('formValue', JSON.stringify(this.formTV.value));
   }
 
   async search(): Promise<void> {
@@ -184,11 +247,13 @@ export class AppComponent implements OnInit {
       }
     }
 
-    //
     console.log('searchParams', searchParams, 'tvIds', tvIds)
   }
 
   getKeywordsList() {
+    if (this.keywords.length === 0) {
+      return 'No keywords selected';
+    }
     return this.keywords.join(',');
   }
 }
